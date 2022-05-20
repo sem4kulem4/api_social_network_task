@@ -10,7 +10,7 @@ from .models import Article, Score
 
 class ArticleSerializer(serializers.ModelSerializer):
     #rating = serializers.SerializerMethodField()
-    #title_transliterate = serializers.SerializerMethodField()
+    title_transliterate = serializers.CharField(read_only=True)
     author = serializers.StringRelatedField(read_only=True, default=serializers.CurrentUserDefault())
     class Meta:
         model = Article

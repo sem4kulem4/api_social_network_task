@@ -11,13 +11,18 @@ User = get_user_model()
 class Article(models.Model):
     """Модель записи."""
     title = models.CharField(max_length=100, unique=True)
-    #title_transliterate = models.CharField(max_length=100)
+    title_transliterate = models.CharField(max_length=100)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='article')
     summary = models.CharField(max_length=250)
     text = models.TextField()
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     view_count = models.IntegerField(default=0)
     rating = models.IntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        transliterate = translit(self.title, language_code='ru', reversed=True)
+        self.title_transliterate = transliterate.strip().replace(' ', '-')
+        return super(Article, self).save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.author} - {self.title}'
