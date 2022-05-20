@@ -50,8 +50,8 @@ class Score(models.Model):
         (0, '0'),
         (1, '1'),
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='score')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='score')
     score = models.IntegerField(default=0, choices=SCORE_CHOICES)
 
     class Meta:
@@ -61,6 +61,12 @@ class Score(models.Model):
                 name='unique_score'
             )
         ]
+
+    # def save(self, *args, **kwargs):
+    #     rating = Score.objects.filter(article_id=self.article).aggregate(Sum('score'))
+    #     Article.objects.get(id=self.article).update(rating=rating)
+    #     return super(Score, self).save()
+    # я так понял тут надо что то переопределить(это не робит)
 
     def __str__(self):
         return f'{self.score} - {self.user} - {self.article.title}'

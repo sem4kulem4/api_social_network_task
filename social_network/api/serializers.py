@@ -12,24 +12,24 @@ class ArticleSerializer(serializers.ModelSerializer):
     #rating = serializers.SerializerMethodField()
     title_transliterate = serializers.CharField(read_only=True)
     author = serializers.StringRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Article
         fields = '__all__'
-    #
-    # def get_title_transliterate(self, obj):
-    #     title_transliterate = translit(obj.title, language_code='ru', reversed=True)
-    #     title_transliterate = title_transliterate.strip()
-    #     title_transliterate = title_transliterate.replace(' ', '-')
-    #     print(title_transliterate)
-    #     return title_transliterate
-    #
+
     # def get_rating(self, obj):
     #     rating = Score.objects.filter(article_id=obj.id).aggregate(Sum('score'))
     #     return rating['score__sum']
 
 
 class RatingSerializer(serializers.ModelSerializer):
+    SCORE_CHOICES = (
+        (-1, '-1'),
+        (0, '0'),
+        (1, '1'),
+    )
     user = serializers.StringRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+    score = serializers.ChoiceField(choices=SCORE_CHOICES)
 
     class Meta:
         model = Score

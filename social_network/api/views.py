@@ -1,11 +1,15 @@
+import http
+
 from django.shortcuts import render
+from requests import Response
 
 from rest_framework import viewsets, mixins
+
+from django.http import HttpResponseBadRequest
 
 from .models import Article, Score
 from .permissions import AuthorArticleOrReadOnly, AuthorScoreOrReadOnly
 from .serializers import ArticleSerializer, RatingSerializer
-
 
 
 class ArticleViewSet(viewsets.ModelViewSet):
@@ -33,4 +37,12 @@ class RatingViewSet(viewsets.ModelViewSet):
     permission_classes = (AuthorScoreOrReadOnly,)
 
     def perform_create(self, serializer):
+        print(serializer.validated_data)
+        if serializer.validated_data['score'] == 0:
+            raise Exception('Cannot create a ZERO score')
         serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.validated_data['score'] == 0:
+            Score.objects.get(user=self.request.user, article_id=serializer.validated_data['article']).delete()
+        return super(RatingViewSet, self).perform_update(serializer)
