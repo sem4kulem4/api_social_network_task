@@ -2,7 +2,6 @@ from transliterate import translit
 
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import Sum
 
 
 User = get_user_model()
@@ -21,27 +20,30 @@ class Article(models.Model):
 
     def save(self, *args, **kwargs):
         transliterate = translit(self.title, language_code='ru', reversed=True)
-        self.title_transliterate = transliterate.strip().replace(' ', '-')
+        self.title_transliterate = transliterate.strip().replace(' ', '_')
         return super(Article, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.author} - {self.title}'
+        return f'{self.author} - {self.title} - {self.rating}'
 
 
-# class Favorite(models.Model):
-#     """Модель с избранными записями."""
-#     user = models.ManyToManyField(User)
-#     favorite = models.ManyToManyField(Article)
-#
-#     class Meta:
-#         constraints = [
-#             models.UniqueConstraint(
-#                 fields=['user', 'favorite'],
-#                 name='unique_favourite'
-#             )
-#         ]
-#
-#
+class Favorite(models.Model):
+    """Модель с избранными записями."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite')
+    favorite = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='favorite')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'favorite'],
+                name='unique_favourite'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} - {self.favorite}'
+
+
 
 class Score(models.Model):
     """Модель с оценками записей."""
@@ -61,12 +63,6 @@ class Score(models.Model):
                 name='unique_score'
             )
         ]
-
-    # def save(self, *args, **kwargs):
-    #     rating = Score.objects.filter(article_id=self.article).aggregate(Sum('score'))
-    #     Article.objects.get(id=self.article).update(rating=rating)
-    #     return super(Score, self).save()
-    # я так понял тут надо что то переопределить(это не робит)
 
     def __str__(self):
         return f'{self.score} - {self.user} - {self.article.title}'

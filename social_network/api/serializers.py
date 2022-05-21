@@ -1,25 +1,16 @@
-from transliterate import translit
-
-from django.db.models import Sum
-
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from .models import Article, Score
+from .models import Article, Favorite, Score
 
 
 class ArticleSerializer(serializers.ModelSerializer):
-    #rating = serializers.SerializerMethodField()
     title_transliterate = serializers.CharField(read_only=True)
     author = serializers.StringRelatedField(read_only=True, default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Article
         fields = '__all__'
-
-    # def get_rating(self, obj):
-    #     rating = Score.objects.filter(article_id=obj.id).aggregate(Sum('score'))
-    #     return rating['score__sum']
 
 
 class RatingSerializer(serializers.ModelSerializer):
@@ -41,3 +32,11 @@ class RatingSerializer(serializers.ModelSerializer):
                 fields=('article', 'user')
             )
         ]
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Favorite
+        fields = '__all__'
